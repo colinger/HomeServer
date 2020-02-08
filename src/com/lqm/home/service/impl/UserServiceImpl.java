@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
 //		}
 //
 //		User user = getUser(username);
-//		
+//
 //		if (user == null) {
 //			// 用户名不存在
 //			resultData.setCode(-2);
@@ -86,7 +86,7 @@ public class UserServiceImpl implements UserService {
 //			User userinfo = userMapper.selectByPrimaryKey(friends.get(i).getId());
 //			users.add(userinfo);
 //		}
-//		
+//
 //		resultData.setData(users);
 //		resultData.setCode(1);
 //		resultData.setMsg("登录成功");
@@ -104,7 +104,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		User user = getUser(accid);
-		
+
 		if (user == null) {
 			// 用户名不存在
 			resultData.setCode(-2);
@@ -137,7 +137,7 @@ public class UserServiceImpl implements UserService {
 		return resultData;
 	}
 
-	
+
 
 	@Override
 	public ResultData<User> register(int homeid,String phone, String password,String accid, String username, String userphoto, String sex,
@@ -157,13 +157,13 @@ public class UserServiceImpl implements UserService {
 			resultData.setSuccess(false);
 			return resultData;
 		}
-		
+
 		//同时注册云信
-		MainTest.createUser(accid, username, password,userphoto);  
+//		MainTest.createUser(accid, username, password,userphoto);
 
 //		//注册环信账号
 //		registInHuanxin(username,password,username);
-		
+
 		// 插入到admin表
 		User user = new User();
 		user.setHomeid(homeid);
@@ -179,7 +179,7 @@ public class UserServiceImpl implements UserService {
 		user.setSignDesc(describe);
 		user.setCreateTime(TimeUtil.getCurrentTimeString());
 		userMapper.insert(user);// 插入到数据库
-		
+
 		resultData.setData(user);
 		resultData.setCode(1);
 		resultData.setMsg("注册成功");
@@ -197,8 +197,8 @@ public class UserServiceImpl implements UserService {
 		}
 		return list.get(0);
 	}
-	
-	
+
+
 	private List<Friend> getFriends(Integer id){
 		FriendExample friendExample = new FriendExample();
 		com.lqm.home.po.FriendExample.Criteria criteria = friendExample.createCriteria();
@@ -224,14 +224,14 @@ public class UserServiceImpl implements UserService {
 	public int update(User user) {
 		return userMapper.updateByPrimaryKey(user);
 	}
-	
+
 //	private List<User> getFriendsInfo(Integer id) {
 //		UserExample userExample = new UserExample();
 //		com.lqm.home.po.UserExample.Criteria criteria = userExample.createCriteria();
 //		criteria.andIdEqualTo(id);
 //		List<User> users = userMapper.selectByExample(userExample);
 //		return users;
-//		
+//
 //	}
 
 }
