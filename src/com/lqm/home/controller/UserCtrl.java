@@ -23,49 +23,131 @@ import com.lqm.home.utils.ResultData;
 import com.lqm.home.utils.TimeUtil;
 
 
-
 @Controller
-@RequestMapping(value="user",produces="text/plain;charset=UTF-8")
+@RequestMapping(value = "user", produces = "text/plain;charset=UTF-8")
 public class UserCtrl {
-	
-	@Resource
-	private UserService userService;
-	@Resource
-	private UserMapper userMapper;
-	
 
-	/** 注册 */
-	@RequestMapping(value = "register", produces = { "application/json;charset=UTF-8" }, method = RequestMethod.POST)
+    @Resource
+    private UserService userService;
+    @Resource
+    private UserMapper userMapper;
+
+
+    /**
+     * 注册
+     */
+    @RequestMapping(value = "register", produces = {"application/json;charset=UTF-8"}, method = RequestMethod.POST)
+    public @ResponseBody
+    ResultData<User> register(
+            @RequestParam(value = "homeid", required = true) int homeid,
+            @RequestParam(value = "tel", required = false) String tel,
+            @RequestParam(value = "password", required = true) String password,
+            @RequestParam(value = "accid", required = true) String accid,
+            @RequestParam(value = "username", required = true) String username,
+            @RequestParam(value = "sex", required = false) String sex,
+            @RequestParam(value = "birthday", required = false) String birthday,
+            @RequestParam(value = "province", required = false) String province,
+            @RequestParam(value = "city", required = false) String city,
+            @RequestParam(value = "sign", required = false) String describe,  //个性签名
+            HttpServletRequest request,
+            @RequestParam(value = "userphoto", required = true) MultipartFile photoImg
+    ) {
+
+        ResultData<User> resultData = new ResultData<>();
+
+        //先判断乡吧号是否已经被注册
+        if (userService.isAlreadyRegistered(accid)) {
+            resultData.setCode(300);
+            resultData.setMsg("此账号已经被注册");
+            resultData.setSuccess(false);
+            return resultData;
+        }
+        try {
+            String userphoto = ImgUtil.saveImgInUserFolder(request, photoImg, photoImg.getOriginalFilename(),
+                    "/upload/img/" + TimeUtil.getWeeksOneDate());
+            String address = province + city;
+            resultData = userService.register(homeid, tel, password, accid, username, userphoto, sex, birthday, address, describe);
+        } catch (Exception e) {
+            e.printStackTrace();
+            LogUtils.error(e.toString());
+            resultData.setCode(-200);
+            resultData.setMsg("处理异常");
+            resultData.setSuccess(true);
+            return resultData;
+        }
+        return resultData;
+    }
+
+	/**
+	 * 第三方注册信息留存
+	 * @param accid openid
+	 * @param username 昵称
+	 * @param userphoto 头像
+	 * @param request
+	 * @return
+	 */
+    @RequestMapping(value = "register1", produces = {"application/json;charset=UTF-8"}, method = RequestMethod.POST)
+    public @ResponseBody
+    ResultData<User> registerWithPhoto(
+            @RequestParam(value = "accid", required = true) String accid,
+            @RequestParam(value = "username", required = true) String username,
+            @RequestParam(value = "userphoto", required = true) String userphoto,  //个性签名
+            HttpServletRequest request
+    ) {
+
+        ResultData<User> resultData = new ResultData<>();
+
+        //先判断乡吧号是否已经被注册
+        if (userService.isAlreadyRegistered(accid)) {
+            resultData.setCode(300);
+            resultData.setMsg("此乡吧号已经被注册");
+            resultData.setSuccess(false);
+            return resultData;
+        }
+        try {
+            resultData = userService.register(1, "tel", "123456", accid, username, userphoto, "", "", "", "");
+        } catch (Exception e) {
+            e.printStackTrace();
+            LogUtils.error(e.toString());
+            resultData.setCode(-200);
+            resultData.setMsg("处理异常");
+            resultData.setSuccess(true);
+            return resultData;
+        }
+        return resultData;
+    }
+
+	/**
+	 * 修改用户名和头像
+	 * @param accid
+	 * @param username
+	 * @param request
+	 * @param photoImg
+	 * @return
+	 */
+	@RequestMapping(value = "updateUser", produces = {"application/json;charset=UTF-8"}, method = RequestMethod.POST)
 	public @ResponseBody
-	ResultData<User> register(
-			@RequestParam(value = "homeid", required = true) int homeid,
-			@RequestParam(value = "tel", required = false) String tel,
-			@RequestParam(value = "password", required = true) String password,
+	ResultData<User> updateUser(
 			@RequestParam(value = "accid", required = true) String accid,
 			@RequestParam(value = "username", required = true) String username,
-			@RequestParam(value = "sex", required = false) String sex,
-			@RequestParam(value = "birthday", required = false) String birthday,
-			@RequestParam(value = "province", required = false) String province,
-			@RequestParam(value = "city", required = false) String city,
-			@RequestParam(value = "sign", required = false) String describe,  //个性签名
 			HttpServletRequest request,
-			@RequestParam(value="userphoto",required = true)MultipartFile photoImg
-			) {
-		
+			@RequestParam(value = "userphoto", required = true) MultipartFile photoImg
+	) {
+
 		ResultData<User> resultData = new ResultData<>();
-		
+
 		//先判断乡吧号是否已经被注册
-		if(userService.isAlreadyRegistered(accid)){
+		if (userService.isAlreadyRegistered(accid)) {
 			resultData.setCode(300);
 			resultData.setMsg("此乡吧号已经被注册");
 			resultData.setSuccess(false);
 			return resultData;
 		}
 		try {
-			String userphoto = ImgUtil.saveImgInUserFolder(request, photoImg, photoImg.getOriginalFilename(), 
-					"/upload/img/"+TimeUtil.getWeeksOneDate());
-			String address = province+ city;
-			resultData = userService.register(homeid,tel, password,accid,username,userphoto,sex,birthday,address,describe);
+			String userphoto = ImgUtil.saveImgInUserFolder(request, photoImg, photoImg.getOriginalFilename(),
+					"/upload/img/" + TimeUtil.getWeeksOneDate());
+			String address = "";
+			resultData = userService.updateNicknameAndPhoto(accid, username, userphoto);
 		} catch (Exception e) {
 			e.printStackTrace();
 			LogUtils.error(e.toString());
@@ -76,47 +158,48 @@ public class UserCtrl {
 		}
 		return resultData;
 	}
-	
 
-	/** 登录 */
-	@RequestMapping(value = "login", produces = { "application/json;charset=UTF-8" }, method = RequestMethod.POST)
-	public @ResponseBody
-	ResultData<LoginReturnData> login(
-			@RequestParam(value = "accid", required = true) String accid,
-			@RequestParam(value = "password", required = true) String password
-			) {
-		ResultData<LoginReturnData> resultData = new ResultData<>();
-		try {
-			resultData = userService.login(accid, password);
-		} catch (Exception e) {
-			e.printStackTrace();
-			LogUtils.error(e.toString());
-			resultData.setCode(-200);
-			resultData.setMsg("处理异常");
-			System.out.println(resultData);
-			return resultData;
-		}
+    /**
+     * 登录
+     */
+    @RequestMapping(value = "login", produces = {"application/json;charset=UTF-8"}, method = RequestMethod.POST)
+    public @ResponseBody
+    ResultData<LoginReturnData> login(
+            @RequestParam(value = "accid", required = true) String accid,
+            @RequestParam(value = "password", required = true) String password
+    ) {
+        ResultData<LoginReturnData> resultData = new ResultData<>();
+        try {
+            resultData = userService.login(accid, password);
+        } catch (Exception e) {
+            e.printStackTrace();
+            LogUtils.error(e.toString());
+            resultData.setCode(-200);
+            resultData.setMsg("处理异常");
+            System.out.println(resultData);
+            return resultData;
+        }
 
-		return resultData;
-	}
-	
-	/***
-	 * 更换关注的乡吧
-	 */
-	@RequestMapping(value = "replaceVillage", produces = { "application/json;charset=UTF-8" }, method = RequestMethod.POST)
-	@ResponseBody
-	public ResultData<User> replaceVillage(
-			@RequestParam(value = "userid", required = true) Integer userid,
-			@RequestParam(value = "villageid", required = true) Integer villageid
-			) throws Exception {
-		User user = userMapper.selectByPrimaryKey(userid);
-		user.setHomeid(villageid);
-		userService.update(user);
-		ResultData<User> resultData = new ResultData<>();
-		resultData.setData(user);
-		resultData.setCode(200);
-		resultData.setMsg("切换乡吧成功");
-		return resultData;
-	}
-	
+        return resultData;
+    }
+
+    /***
+     * 更换关注的乡吧
+     */
+    @RequestMapping(value = "replaceVillage", produces = {"application/json;charset=UTF-8"}, method = RequestMethod.POST)
+    @ResponseBody
+    public ResultData<User> replaceVillage(
+            @RequestParam(value = "userid", required = true) Integer userid,
+            @RequestParam(value = "villageid", required = true) Integer villageid
+    ) throws Exception {
+        User user = userMapper.selectByPrimaryKey(userid);
+        user.setHomeid(villageid);
+        userService.update(user);
+        ResultData<User> resultData = new ResultData<>();
+        resultData.setData(user);
+        resultData.setCode(200);
+        resultData.setMsg("切换乡吧成功");
+        return resultData;
+    }
+
 }
