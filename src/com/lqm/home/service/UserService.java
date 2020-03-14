@@ -52,7 +52,7 @@ public interface UserService {
      * @return
      * @throws Exception
      */
-    ResultData<User> updateNicknameAndPhoto(String accid, String username, String userphoto) throws Exception;
+    ResultData<User> updateNicknameAndPhoto(String accid, String username,String password, String userphoto) throws Exception;
 
     /**
      * 判断乡吧号是否已经被注册了

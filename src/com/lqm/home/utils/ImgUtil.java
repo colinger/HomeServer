@@ -16,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 
 public class ImgUtil {
-	
+
 	/**
 	 * 保存图片文件至用户文件夹中
 	 * @param hsr 全局HttpServletRequest
@@ -24,13 +24,16 @@ public class ImgUtil {
 	 * @param fileName 图片文件名
 	 * @param path 文件夹路径
 	 * @return 返回图片路径
-	 * @throws Exception 
-	 * @throws IllegalStateException 
+	 * @throws Exception
+	 * @throws IllegalStateException
 	 */
 	@SuppressWarnings("unused")
 	public static String saveImgInUserFolder(
-			HttpServletRequest request, MultipartFile file, String fileName, String path) 
+			HttpServletRequest request, MultipartFile file, String fileName, String path)
 					throws Exception{
+		if(file == null){
+			return "";
+		}
 		long l = System.nanoTime();//获取系统当前时间（唯一值）
 		String root = request.getServletContext().getRealPath(path);//保存图片文件夹的路径
 		File fil=new File(root);//创建用户文件夹

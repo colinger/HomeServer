@@ -187,7 +187,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResultData<User> updateNicknameAndPhoto(String accid, String username, String userphoto) throws Exception {
+    public ResultData<User> updateNicknameAndPhoto(String accid, String username,String password, String userphoto) throws Exception {
         ResultData<User> resultData = new ResultData<>();
         if (StringUtils.isEmpty(username) && StringUtils.isEmpty(userphoto)) {
             resultData.setCode(-100);
@@ -203,9 +203,14 @@ public class UserServiceImpl implements UserService {
 			return resultData;
 		}
         haveuser.setUsername(username);
-        haveuser.setUserPhoto(userphoto);
+        if(org.apache.commons.lang.StringUtils.isNotBlank(userphoto)) {
+            haveuser.setUserPhoto(userphoto);
+        }
+        if(org.apache.commons.lang.StringUtils.isNotBlank(password)) {
+            haveuser.setPassword(password);
+        }
 		userMapper.updateByPrimaryKey(haveuser);
-
+        haveuser = getUser(accid);
 		resultData.setData(haveuser);
 		resultData.setCode(1);
 		resultData.setMsg("更新成功");

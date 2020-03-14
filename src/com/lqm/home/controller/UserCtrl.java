@@ -130,24 +130,16 @@ public class UserCtrl {
 	ResultData<User> updateUser(
 			@RequestParam(value = "accid", required = true) String accid,
 			@RequestParam(value = "username", required = true) String username,
+			@RequestParam(value = "password", required = false) String password,
 			HttpServletRequest request,
-			@RequestParam(value = "userphoto", required = true) MultipartFile photoImg
+			@RequestParam(value = "userphoto", required = false) MultipartFile photoImg
 	) {
 
 		ResultData<User> resultData = new ResultData<>();
-
-		//先判断乡吧号是否已经被注册
-		if (userService.isAlreadyRegistered(accid)) {
-			resultData.setCode(300);
-			resultData.setMsg("此乡吧号已经被注册");
-			resultData.setSuccess(false);
-			return resultData;
-		}
 		try {
 			String userphoto = ImgUtil.saveImgInUserFolder(request, photoImg, photoImg.getOriginalFilename(),
 					"/upload/img/" + TimeUtil.getWeeksOneDate());
-			String address = "";
-			resultData = userService.updateNicknameAndPhoto(accid, username, userphoto);
+			resultData = userService.updateNicknameAndPhoto(accid, username, password, userphoto);
 		} catch (Exception e) {
 			e.printStackTrace();
 			LogUtils.error(e.toString());
