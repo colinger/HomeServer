@@ -157,12 +157,6 @@ public class UserServiceImpl implements UserService {
             return resultData;
         }
 
-        //同时注册云信
-//		MainTest.createUser(accid, username, password,userphoto);
-
-//		//注册环信账号
-//		registInHuanxin(username,password,username);
-
         // 插入到admin表
         User user = new User();
         user.setHomeid(homeid);
@@ -189,7 +183,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResultData<User> updateNicknameAndPhoto(String accid, String username,String password, String userphoto) throws Exception {
         ResultData<User> resultData = new ResultData<>();
-        if (StringUtils.isEmpty(username) && StringUtils.isEmpty(userphoto)) {
+        if (StringUtils.isEmpty(username)) {
             resultData.setCode(-100);
             resultData.setMsg("请求参数不能为空");
             resultData.setSuccess(false);

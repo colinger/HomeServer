@@ -96,14 +96,6 @@ public class UserCtrl {
     ) {
 
         ResultData<User> resultData = new ResultData<>();
-
-        //先判断乡吧号是否已经被注册
-        if (userService.isAlreadyRegistered(accid)) {
-            resultData.setCode(300);
-            resultData.setMsg("此乡吧号已经被注册");
-            resultData.setSuccess(false);
-            return resultData;
-        }
         try {
             resultData = userService.register(1, "tel", "123456", accid, username, userphoto, "", "", "", "");
         } catch (Exception e) {
@@ -137,9 +129,13 @@ public class UserCtrl {
 
 		ResultData<User> resultData = new ResultData<>();
 		try {
-			String userphoto = ImgUtil.saveImgInUserFolder(request, photoImg, photoImg.getOriginalFilename(),
-					"/upload/img/" + TimeUtil.getWeeksOneDate());
-			resultData = userService.updateNicknameAndPhoto(accid, username, password, userphoto);
+		    if(photoImg == null){
+                resultData = userService.updateNicknameAndPhoto(accid, username, password, null);
+            }else {
+                String userphoto = ImgUtil.saveImgInUserFolder(request, photoImg, photoImg.getOriginalFilename(),
+                        "/upload/img/" + TimeUtil.getWeeksOneDate());
+                resultData = userService.updateNicknameAndPhoto(accid, username, password, userphoto);
+            }
 		} catch (Exception e) {
 			e.printStackTrace();
 			LogUtils.error(e.toString());
